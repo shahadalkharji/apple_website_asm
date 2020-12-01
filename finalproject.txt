@@ -1,0 +1,236 @@
+.model small
+.stack 100h
+
+.data
+Apple db '-Apple Application- $' 
+choose db 0ah,0dh,'Choose an option: $'
+Menu1 db 0ah,0dh,'1-Make an Order $' 
+Menu2 db 0ah,0dh,'2-Display the bill $'
+Menu3 db 0ah,0dh,'3-Check for a price $'
+Menu4 db 0ah,0dh,'4-Exit $'
+MenuSelection db  0ah,0dh,'Your choice: $' 
+Sales1 db 0ah,0dh,'NO.           DEVICE         PRICE $'
+Sales2 db 0ah,0dh,'1             MAC            2000 S.R $'
+Sales3 db 0ah,0dh,'2             IPHONE         4000 S,R $'
+Sales4 db 0ah,0dh,'3             IPAD           1700 S.R $' 
+Sales5 db 0ah,0dh,'4             WATCH          1500 S.R $'
+choice db 0ah,0dh,'Enter your choice or ZERO to exit:  $' 
+GoodPrice db 0ah,0dh,'Dear Customer, You will be Given a Price :) $' 
+NoGoodPrice db 0ah,0dh,'Dear Customer,Im sorry you wont be given a Price :) $'   
+msg db 0ah,0dh,'The Application will terminate $'  
+total db 0ah,0dh,'Total bill price $'
+p1 dw 2000
+p2 dw 4000
+p3 dw 1700
+p4 dw 1500 
+bill dw 0  
+
+
+.code
+
+main proc
+ 
+ mov ax,@data
+ mov ds,ax        ;load data
+ 
+ lea dx,Apple
+ mov ah,9
+ int 21h
+ 
+ mov dl,0ah 
+ mov ah,2      
+ int 21h
+               ; new line
+ mov dl,0dh
+ mov ah,2
+ int 21h
+ 
+ 
+ mov cx,25       ; loop counter
+ 
+ Stars:
+ mov ah,2
+ mov dl,'*'        ; loop to display the stars
+ int 21h 
+ 
+ loop Stars 
+ 
+ ;-----------------------------------------------  
+ Menu: 
+ lea dx,choose
+ mov ah,9
+ int 21h                     
+  
+ lea dx,Menu1                 
+ mov ah,9
+ int 21h                        
+ 
+ lea dx,Menu2                     ;   display menu for choosing what option
+ mov ah,9
+ int 21h                        
+                              
+ lea dx,Menu3               
+ mov ah,9
+ int 21h
+ 
+ lea dx,Menu4
+ mov ah,9
+ int 21h 
+ ;----------------------------------------------- 
+  lea dx,MenuSelection
+  mov ah,9
+  int 21h 
+  mov ah,1  ; user's choice
+  int 21h
+  cmp al,31h
+  je Sales
+  cmp al,32h                           ; to go to which option of the menu
+  je DisplayBill  
+  cmp al,33h
+  je CheckPrice
+  cmp al,34h
+  je termination
+  cmp al,34h
+  jg exit         ; smaller or larger than 1-4 then return control to DOS
+  cmp al,31h
+  jl exit
+ ;-----------------------------------------------
+
+ Sales:                 
+ lea dx,Sales1
+ mov ah,9
+ int 21h 
+  
+ lea dx,Sales2
+ mov ah,9
+ int 21h 
+ 
+ lea dx,Sales3
+ mov ah,9
+ int 21h 
+                             ; to purchase a device
+ lea dx,Sales4
+ mov ah,9
+ int 21h
+ 
+ lea dx,Sales5
+ mov ah,9
+ int 21h
+    
+ lea dx,choice
+ mov ah,9
+ int 21h 
+ 
+ mov ah,1
+ int 21h 
+         
+ mov bl,al
+  
+  ;---------------------------------------------------- 
+        
+ cmp bl,31h
+ jne TO2    
+ mov DX,p1
+ add bill,dx
+ jmp sales
+  
+ TO2:
+ cmp bl,32h 
+  jne TO3
+ mov DX,p2
+ add bill,dx    
+ 
+ jmp sales
+ 
+ TO3:
+ cmp bl,33h 
+ jne TO4   
+ mov DX,p3
+ add bill,dx
+ 
+ jmp sales
+      
+ TO4:  
+  cmp bl,34h 
+  jne else
+  mov DX,p4
+ add bill,dx   
+ jmp sales  
+ 
+ else: 
+ cmp bl,30h
+ je Menu
+ jne exit
+ 
+   DisplayBill:
+    mov ah,9
+    lea dx,total
+    int 21h
+    
+    mov ax,bill
+    mov dx,0
+    
+    push ax
+    push dx
+    
+    pop dx
+    pop ax  
+    
+    mov bx,10
+    push bx
+   as: mov cx,ax 
+    mov ax,dx
+    xor dx,dx
+    div bx
+    push dx
+    mov dx,cx
+    or cx,ax
+    jnz as
+    pop dx
+   bs:
+    add dl,30h
+    mov ah,2
+    int 21h
+    pop dx
+    cmp dx,bx
+    jb bs
+    
+    
+  jmp menu
+  
+  
+  CheckPrice: 
+   mov AX,bill
+   cmp AX,p4       
+   jg GiveAprice
+   jle NoPrice
+   
+   GiveAprice: 
+   
+   lea dx,GoodPrice
+   mov ah,9             ; greater than 1500
+   int 21h 
+   jmp menu  
+   
+   NoPrice: 
+   lea dx,NoGoodPrice
+   mov ah,9
+   int 21h              ; less than 1500
+   jmp menu 
+    
+    
+   exit:
+  mov ah,4ch
+  int 21h   
+  
+  termination:
+   lea dx,msg
+  mov ah,9
+  int 21h 
+  mov ah,4ch
+  int 21h   
+    
+    
+    main endp
+end main
+
