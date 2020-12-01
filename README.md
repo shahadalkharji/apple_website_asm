@@ -1,2 +1,7 @@
-# apple_website_asm
+# Description
 A small program written in assembly language
+
+# Language 
+Assembly
+
+
